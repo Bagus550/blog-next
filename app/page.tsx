@@ -10,7 +10,7 @@ export default async function Home() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.log("Error nih bray:", error);
+    console.log("Error:", error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-red-500 font-bold p-10">
         Error: {error.message}
@@ -25,7 +25,7 @@ export default async function Home() {
         <header className="flex justify-between items-center mb-16">
           <div className="flex flex-col">
             <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
-              Blog Kece Gw 🚀
+              BagusBlog
             </h1>
             <p className="text-gray-400 font-medium mt-1">
               Tempat berbagi cerita random.
@@ -35,7 +35,7 @@ export default async function Home() {
             href="/admin"
             className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-transform shadow-lg"
           >
-            Admin 🛠️
+            Admin
           </Link>
         </header>
 
@@ -111,7 +111,7 @@ export default async function Home() {
         </div>
 
         <footer className="mt-24 pb-12 text-center text-gray-300 text-sm font-bold tracking-widest uppercase">
-          © 2026 Blog Kece Gw — Made with ☕
+          © 2026 BagusBlog — Made with Next.js
         </footer>
       </div>
     </main>

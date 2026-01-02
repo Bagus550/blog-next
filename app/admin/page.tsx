@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
-import Image from "@tiptap/extension-image"; // <--- Tambah ini
-import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"; // <--- Tambah ini
+import Image from "@tiptap/extension-image";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 
 const lowlight = createLowlight(common);
@@ -27,10 +27,8 @@ export default function AdminPage() {
         heading: {
           levels: [1, 2, 3],
         },
-        // WAJIB: matikan codeBlock bawaan biar gak tabrakan sama extension Lowlight
         codeBlock: false,
       }),
-      // --- TAMBAHKAN INI BRAY ---
       Image.configure({
         HTMLAttributes: {
           class: "rounded-3xl shadow-lg max-w-full h-auto my-8 mx-auto block",
@@ -39,7 +37,6 @@ export default function AdminPage() {
       CodeBlockLowlight.configure({
         lowlight,
       }),
-      // --------------------------
       TextAlign.configure({
         types: ["heading", "paragraph"],
         alignments: ["left", "center", "right", "justify"],
@@ -57,7 +54,6 @@ export default function AdminPage() {
 
   // Ganti fungsi addImageInContent lama lu sama yang ini bray
   const addImageInContent = async () => {
-    // 1. Bikin input file siluman
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
@@ -66,10 +62,9 @@ export default function AdminPage() {
       const file = input.files?.[0];
       if (!file) return;
 
-      setUploading(true); // Pake state loading yang udah lu punya
+      setUploading(true);
 
       try {
-        // 2. Upload ke Supabase Storage
         const fileName = `content-${Date.now()}.${file.name.split(".").pop()}`;
         const { error: uploadError } = await supabase.storage
           .from("blog-images")
@@ -77,12 +72,10 @@ export default function AdminPage() {
 
         if (uploadError) throw uploadError;
 
-        // 3. Ambil URL Public-nya
         const { data } = supabase.storage
           .from("blog-images")
           .getPublicUrl(fileName);
 
-        // 4. Masukin ke Editor Tiptap
         editor?.chain().focus().setImage({ src: data.publicUrl }).run();
       } catch (error: any) {
         alert("Gagal upload gambar konten: " + error.message);
@@ -91,7 +84,7 @@ export default function AdminPage() {
       }
     };
 
-    input.click(); // Triger klik inputnya
+    input.click();
   };
 
   const fetchPosts = async () => {
@@ -118,18 +111,16 @@ export default function AdminPage() {
   }, [editId, editor, posts]);
 
   const handleLogout = async () => {
-    setLoading(true); // Biar ada feedback pas klik
+    setLoading(true);
     try {
       await supabase.auth.signOut();
-      // Clear cookies manual (optional tapi manjur buat jaga-jaga)
       document.cookie.split(";").forEach((c) => {
         document.cookie = c
           .replace(/^ +/, "")
           .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
 
-      // Pake window.location biar proxy.ts kepanggil fresh dari server
-      window.location.href = "/login";
+      window.location.href = "/";
     } catch (err) {
       console.error("Gagal logout bray", err);
     } finally {
@@ -200,7 +191,7 @@ export default function AdminPage() {
 
   const handleDelete = async (id: number) => {
     if (
-      confirm("Yakin mau hapus postingan ini bray? Gak bisa balik lagi loh!")
+      confirm("Yakin mau hapus postingan?")
     ) {
       const { error } = await supabase.from("posts").delete().eq("id", id);
       if (error) alert("Gagal hapus: " + error.message);
@@ -252,7 +243,7 @@ export default function AdminPage() {
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Kasih judul yang maut bray..."
+                    placeholder="Kasih judul disini"
                     className="w-full p-5 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-4 focus:ring-blue-100 outline-none font-bold text-xl transition-all"
                     required
                   />
@@ -319,7 +310,7 @@ export default function AdminPage() {
                         </button>
                       </div>
 
-                      {/* GROUP 3: CODE & IMAGE (Sakti!) */}
+                      {/* GROUP 3: CODE & IMAGE*/}
                       <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
                         <button
                           type="button"
@@ -505,7 +496,7 @@ export default function AdminPage() {
   );
 }
 
-// Icons (Simpel aja bray)
+// Icons
 const AlignLeftIcon = () => (
   <svg
     width="18"

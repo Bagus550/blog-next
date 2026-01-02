@@ -57,7 +57,6 @@ export default async function BlogDetail({
           </div>
         </div>
 
-        {/* INI PERUBAHAN SAKTINYA BRAY */}
         <div
           className="prose prose-lg md:prose-xl prose-blue max-w-none 
           prose-headings:font-black prose-headings:tracking-tighter 
