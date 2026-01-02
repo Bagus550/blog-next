@@ -33,7 +33,7 @@ export default async function BlogDetail({
           <img
             src={post.image_url}
             alt={post.title}
-            className="w-full h-auto max-h-[500px] object-cover rounded-[2.5rem] mb-10 shadow-2xl"
+            className="w-full h-auto max-h-125 object-cover rounded-[2.5rem] mb-10 shadow-2xl"
           />
         )}
 

@@ -5,7 +5,12 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import TextAlign from "@tiptap/extension-text-align"; // <--- IMPORT INI
+import TextAlign from "@tiptap/extension-text-align";
+import Image from "@tiptap/extension-image"; // <--- Tambah ini
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"; // <--- Tambah ini
+import { common, createLowlight } from "lowlight";
+
+const lowlight = createLowlight(common);
 
 export default function AdminPage() {
   const [title, setTitle] = useState("");
@@ -18,10 +23,26 @@ export default function AdminPage() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+        },
+        // WAJIB: matikan codeBlock bawaan biar gak tabrakan sama extension Lowlight
+        codeBlock: false,
+      }),
+      // --- TAMBAHKAN INI BRAY ---
+      Image.configure({
+        HTMLAttributes: {
+          class: "rounded-3xl shadow-lg max-w-full h-auto my-8 mx-auto block",
+        },
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+      }),
+      // --------------------------
       TextAlign.configure({
         types: ["heading", "paragraph"],
-        alignments: ["left", "center", "right", "justify"], // <--- PASTIIN JUSTIFY ADA DI SINI
+        alignments: ["left", "center", "right", "justify"],
       }),
     ],
     content: "",
@@ -33,6 +54,45 @@ export default function AdminPage() {
       },
     },
   });
+
+  // Ganti fungsi addImageInContent lama lu sama yang ini bray
+  const addImageInContent = async () => {
+    // 1. Bikin input file siluman
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      setUploading(true); // Pake state loading yang udah lu punya
+
+      try {
+        // 2. Upload ke Supabase Storage
+        const fileName = `content-${Date.now()}.${file.name.split(".").pop()}`;
+        const { error: uploadError } = await supabase.storage
+          .from("blog-images")
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // 3. Ambil URL Public-nya
+        const { data } = supabase.storage
+          .from("blog-images")
+          .getPublicUrl(fileName);
+
+        // 4. Masukin ke Editor Tiptap
+        editor?.chain().focus().setImage({ src: data.publicUrl }).run();
+      } catch (error: any) {
+        alert("Gagal upload gambar konten: " + error.message);
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    input.click(); // Triger klik inputnya
+  };
 
   const fetchPosts = async () => {
     const { data } = await supabase
@@ -49,9 +109,19 @@ export default function AdminPage() {
   useEffect(() => {
     if (editId && editor) {
       const postToEdit = posts.find((p) => p.id === editId);
-      if (postToEdit) editor.commands.setContent(postToEdit.content);
+      if (postToEdit) {
+        editor.commands.setContent(postToEdit.content);
+        setTitle(postToEdit.title);
+        setImageUrl(postToEdit.image_url || "");
+      }
     }
   }, [editId, editor, posts]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,202 +171,179 @@ export default function AdminPage() {
     fetchPosts();
   };
 
-  const startEdit = (post: any) => {
-    setEditId(post.id);
-    setTitle(post.title);
-    setImageUrl(post.image_url || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleDelete = async (id: number) => {
+    if (
+      confirm("Yakin mau hapus postingan ini bray? Gak bisa balik lagi loh!")
+    ) {
+      const { error } = await supabase.from("posts").delete().eq("id", id);
+      if (error) alert("Gagal hapus: " + error.message);
+      else fetchPosts();
+    }
   };
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 p-6 md:p-12 font-sans">
       <div className="max-w-5xl mx-auto">
         <header className="flex justify-between items-center mb-10">
-          <h1 className="text-4xl font-black tracking-tighter">
-            EDITOR KONTEN ✍️
-          </h1>
-          <button
-            onClick={() => router.push("/")}
-            className="text-sm font-bold bg-black text-white px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-transform"
-          >
-            ← Balik ke Blog
-          </button>
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase">
+              Editor Konten ✍️
+            </h1>
+            <p className="text-gray-400 font-bold text-sm">
+              Welcome back, Admin Kece!
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => router.push("/")}
+              className="text-sm font-bold bg-white border border-gray-200 px-6 py-2 rounded-full hover:bg-gray-50"
+            >
+              Home
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-sm font-bold bg-red-500 text-white px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-all"
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
-        <section className="mb-20">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-gray-100">
-              <h2 className="text-2xl font-black mb-8">
-                {editId ? "📝 Edit Postingan" : "🚀 Buat Postingan Baru"}
-              </h2>
+        <form onSubmit={handleSubmit} className="space-y-6 mb-20">
+          <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-gray-100">
+            <h2 className="text-2xl font-black mb-8">
+              {editId ? "📝 Edit Postingan" : "🚀 Buat Postingan Baru"}
+            </h2>
 
-              <div className="grid md:grid-cols-3 gap-8 mb-8">
-                <div className="md:col-span-2 space-y-6">
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block">
-                      Judul Artikel
-                    </label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Kasih judul yang clickbait bray..."
-                      className="w-full p-5 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-4 focus:ring-blue-100 outline-none font-bold text-xl transition-all"
-                      required
-                    />
-                  </div>
+            <div className="grid md:grid-cols-3 gap-8 mb-8">
+              <div className="md:col-span-2 space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase text-gray-400 mb-2 block">
+                    Judul Artikel
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Kasih judul yang maut bray..."
+                    className="w-full p-5 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-4 focus:ring-blue-100 outline-none font-bold text-xl transition-all"
+                    required
+                  />
+                </div>
 
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block">
-                      Isi Konten
-                    </label>
-                    {/* Toolbar Tiptap (Sticky & Lebih Lengkap) */}
-                    <div className="sticky top-4 z-10 flex flex-wrap gap-2 p-2 bg-gray-900 rounded-t-3xl border-x border-t border-gray-900 shadow-lg">
-                      {/* Kelompok Heading */}
-                      <div className="flex gap-1 pr-2 border-r border-gray-700">
+                <div>
+                  <label className="text-xs font-black uppercase text-gray-400 mb-2 block">
+                    Isi Konten
+                  </label>
+                  <div className="sticky top-4 z-20 bg-gray-900 rounded-t-3xl border border-gray-900 shadow-xl overflow-hidden">
+                    {/* Container Scrollable */}
+                    <div className="flex items-center gap-2 p-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
+                      {/* GROUP 1: HEADINGS */}
+                      <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
+                        {[1, 2, 3].map((l) => (
+                          <button
+                            key={l}
+                            type="button"
+                            onClick={() =>
+                              editor
+                                ?.chain()
+                                .focus()
+                                .toggleHeading({ level: l as any })
+                                .run()
+                            }
+                            className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
+                              editor?.isActive("heading", { level: l })
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-400 hover:text-white"
+                            }`}
+                          >
+                            H{l}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* GROUP 2: FORMATTING */}
+                      <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
                         <button
                           type="button"
                           onClick={() =>
-                            editor
-                              ?.chain()
-                              .focus()
-                              .toggleHeading({ level: 1 })
-                              .run()
+                            editor?.chain().focus().toggleBold().run()
                           }
-                          className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
-                            editor?.isActive("heading", { level: 1 })
+                          className={`px-4 py-2 rounded-xl text-xs font-bold ${
+                            editor?.isActive("bold")
                               ? "bg-blue-500 text-white"
                               : "text-gray-400 hover:text-white"
                           }`}
                         >
-                          {" "}
-                          H1{" "}
+                          BOLD
                         </button>
                         <button
                           type="button"
                           onClick={() =>
-                            editor
-                              ?.chain()
-                              .focus()
-                              .toggleHeading({ level: 2 })
-                              .run()
+                            editor?.chain().focus().toggleItalic().run()
                           }
-                          className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
-                            editor?.isActive("heading", { level: 2 })
+                          className={`px-4 py-2 rounded-xl text-xs font-bold ${
+                            editor?.isActive("italic")
                               ? "bg-blue-500 text-white"
                               : "text-gray-400 hover:text-white"
                           }`}
                         >
-                          {" "}
-                          H2{" "}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor
-                              ?.chain()
-                              .focus()
-                              .toggleHeading({ level: 3 })
-                              .run()
-                          }
-                          className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
-                            editor?.isActive("heading", { level: 3 })
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                        >
-                          {" "}
-                          H3{" "}
+                          ITALIC
                         </button>
                       </div>
 
-                      {/* Kelompok Styling Dasar */}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          editor?.chain().focus().toggleBold().run()
-                        }
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                          editor?.isActive("bold")
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-400 hover:text-white"
-                        }`}
-                      >
-                        {" "}
-                        BOLD{" "}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          editor?.chain().focus().toggleItalic().run()
-                        }
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                          editor?.isActive("italic")
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-400 hover:text-white"
-                        }`}
-                      >
-                        {" "}
-                        ITALIC{" "}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          editor?.chain().focus().toggleBulletList().run()
-                        }
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                          editor?.isActive("bulletList")
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-400 hover:text-white"
-                        }`}
-                      >
-                        {" "}
-                        LIST{" "}
-                      </button>
+                      {/* GROUP 3: CODE & IMAGE (Sakti!) */}
+                      <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            editor?.chain().focus().toggleCodeBlock().run()
+                          }
+                          className={`px-3 py-2 rounded-xl text-xs font-black ${
+                            editor?.isActive("codeBlock")
+                              ? "bg-green-500 text-white"
+                              : "text-gray-400 hover:text-white"
+                          }`}
+                        >
+                          {"</> CODE"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={addImageInContent}
+                          disabled={uploading}
+                          className="px-3 py-2 rounded-xl text-xs font-black text-gray-400 hover:text-white disabled:opacity-50"
+                        >
+                          {uploading ? "⌛..." : "🖼️ IMAGE"}
+                        </button>
+                      </div>
 
-                      {/* Kelompok Alignment */}
-                      <div className="flex gap-1 border-l border-gray-700 ml-1 pl-2">
+                      {/* GROUP 4: ALIGNMENT */}
+                      <div className="flex gap-1 shrink-0">
                         <button
                           type="button"
                           onClick={() =>
                             editor?.chain().focus().setTextAlign("left").run()
                           }
-                          className={`p-2 rounded-xl transition-all ${
+                          className={`p-2 rounded-xl ${
                             editor?.isActive({ textAlign: "left" })
                               ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
+                              : "text-gray-400"
                           }`}
                         >
-                          {" "}
-                          <AlignLeftIcon />{" "}
+                          <AlignLeftIcon />
                         </button>
                         <button
                           type="button"
                           onClick={() =>
                             editor?.chain().focus().setTextAlign("center").run()
                           }
-                          className={`p-2 rounded-xl transition-all ${
+                          className={`p-2 rounded-xl ${
                             editor?.isActive({ textAlign: "center" })
                               ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
+                              : "text-gray-400"
                           }`}
                         >
-                          {" "}
-                          <AlignCenterIcon />{" "}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().setTextAlign("right").run()
-                          }
-                          className={`p-2 rounded-xl transition-all ${
-                            editor?.isActive({ textAlign: "right" })
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                        >
-                          {" "}
-                          <AlignRightIcon />{" "}
+                          <AlignCenterIcon />
                         </button>
                         <button
                           type="button"
@@ -307,78 +354,77 @@ export default function AdminPage() {
                               .setTextAlign("justify")
                               .run()
                           }
-                          className={`p-2 rounded-xl transition-all ${
+                          className={`p-2 rounded-xl ${
                             editor?.isActive({ textAlign: "justify" })
                               ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
+                              : "text-gray-400"
                           }`}
                         >
                           <AlignJustifyIcon />
                         </button>
                       </div>
                     </div>
-                    <EditorContent editor={editor} />
                   </div>
-                </div>
-
-                <div className="space-y-6">
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-400 block">
-                    Thumbnail
-                  </label>
-                  <div className="relative aspect-4/3 rounded-4xl border-4 border-dashed border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden group hover:border-blue-200 transition-colors">
-                    {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        alt="preview"
-                      />
-                    ) : (
-                      <div className="text-center p-6">
-                        <span className="text-3xl mb-2 block">📸</span>
-                        <p className="text-gray-400 text-xs font-bold">
-                          {uploading ? "Sabar bray..." : "Klik buat upload"}
-                        </p>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading || uploading}
-                    className="w-full bg-blue-600 text-white py-6 rounded-4xl font-black text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100"
-                  >
-                    {loading
-                      ? "LAGI PROSES..."
-                      : editId
-                      ? "SIMPAN PERUBAHAN"
-                      : "PUBLISH SEKARANG"}
-                  </button>
-                  {editId && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditId(null);
-                        setTitle("");
-                        setImageUrl("");
-                        editor?.commands.setContent("");
-                      }}
-                      className="w-full text-red-500 font-bold text-sm"
-                    >
-                      {" "}
-                      Batal Edit{" "}
-                    </button>
-                  )}
+                  <EditorContent editor={editor} />
                 </div>
               </div>
+
+              <div className="space-y-6">
+                <label className="text-xs font-black uppercase text-gray-400 block">
+                  Thumbnail
+                </label>
+                <div className="relative aspect-video rounded-4xl border-4 border-dashed border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden group hover:border-blue-200 transition-all cursor-pointer">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      alt="preview"
+                    />
+                  ) : (
+                    <div className="text-center p-6 text-gray-400 font-bold">
+                      <span className="text-3xl mb-2 block">📸</span>
+                      <p className="text-xs">
+                        {uploading ? "Lagi upload bray..." : "Klik buat upload"}
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || uploading}
+                  className="w-full bg-blue-600 text-white py-6 rounded-4xl font-black text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100"
+                >
+                  {loading
+                    ? "LAGI PROSES..."
+                    : editId
+                    ? "SIMPAN PERUBAHAN"
+                    : "PUBLISH SEKARANG"}
+                </button>
+                {editId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditId(null);
+                      setTitle("");
+                      setImageUrl("");
+                      editor?.commands.setContent("");
+                    }}
+                    className="w-full text-red-500 font-bold text-sm"
+                  >
+                    Batal Edit
+                  </button>
+                )}
+              </div>
             </div>
-          </form>
-        </section>
+          </div>
+        </form>
 
         <section>
           <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
@@ -391,7 +437,7 @@ export default function AdminPage() {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white p-5 rounded-4xl border border-gray-100 flex gap-4 items-center shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white p-5 rounded-4xl border border-gray-100 flex gap-4 items-center shadow-sm hover:shadow-md transition-all"
               >
                 <div className="w-20 h-20 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
                   {post.image_url && (
@@ -411,25 +457,16 @@ export default function AdminPage() {
                 </div>
                 <div className="flex gap-1">
                   <button
-                    onClick={() => startEdit(post)}
-                    className="p-3 hover:bg-blue-50 text-blue-600 rounded-2xl transition-colors"
+                    onClick={() => setEditId(post.id)}
+                    className="p-3 hover:bg-blue-50 text-blue-600 rounded-2xl"
                   >
-                    {" "}
-                    <EditIcon />{" "}
+                    <EditIcon />
                   </button>
                   <button
-                    onClick={() => {
-                      if (confirm("Hapus bray?"))
-                        supabase
-                          .from("posts")
-                          .delete()
-                          .eq("id", post.id)
-                          .then(fetchPosts);
-                    }}
-                    className="p-3 hover:bg-red-50 text-red-500 rounded-2xl transition-colors"
+                    onClick={() => handleDelete(post.id)}
+                    className="p-3 hover:bg-red-50 text-red-500 rounded-2xl"
                   >
-                    {" "}
-                    <TrashIcon />{" "}
+                    <TrashIcon />
                   </button>
                 </div>
               </div>
@@ -441,10 +478,9 @@ export default function AdminPage() {
   );
 }
 
-// ICON KOMPONEN
+// Icons (Simpel aja bray)
 const AlignLeftIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="18"
     height="18"
     viewBox="0 0 24 24"
@@ -462,7 +498,6 @@ const AlignLeftIcon = () => (
 );
 const AlignCenterIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="18"
     height="18"
     viewBox="0 0 24 24"
@@ -478,27 +513,8 @@ const AlignCenterIcon = () => (
     <line x1="18" y1="18" x2="6" y2="18"></line>
   </svg>
 );
-const AlignRightIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="21" y1="10" x2="7" y2="10"></line>
-    <line x1="21" y1="6" x2="3" y2="6"></line>
-    <line x1="21" y1="14" x2="3" y2="14"></line>
-    <line x1="21" y1="18" x2="7" y2="18"></line>
-  </svg>
-);
 const AlignJustifyIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="18"
     height="18"
     viewBox="0 0 24 24"
@@ -516,7 +532,6 @@ const AlignJustifyIcon = () => (
 );
 const EditIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="20"
     height="20"
     viewBox="0 0 24 24"
@@ -526,13 +541,11 @@ const EditIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    {" "}
-    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>{" "}
+    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
   </svg>
 );
 const TrashIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     width="20"
     height="20"
     viewBox="0 0 24 24"
@@ -542,10 +555,9 @@ const TrashIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    {" "}
-    <polyline points="3 6 5 6 21 6"></polyline>{" "}
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>{" "}
-    <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-    <line x1="14" y1="11" x2="14" y2="17"></line>{" "}
+    <polyline points="3 6 5 6 21 6"></polyline>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    <line x1="10" y1="11" x2="10" y2="17"></line>
+    <line x1="14" y1="11" x2="14" y2="17"></line>
   </svg>
 );

@@ -1,3 +1,14 @@
 /* app/globals.css */
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/* Sembunyiin scrollbar tapi tetep bisa digeser */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
