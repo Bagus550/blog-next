@@ -1,6 +1,8 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// ... (import tetap sama)
+
 export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -17,21 +19,17 @@ export default async function proxy(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          // Sinkronin ke request dan response biar cookie langsung nempel bray
+          // Update request cookies biar getUser() dapet data terbaru
           request.cookies.set({ name, value, ...options });
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           });
           response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: "", ...options });
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           });
           response.cookies.set({ name, value: "", ...options });
         },
@@ -39,30 +37,28 @@ export default async function proxy(request: NextRequest) {
     }
   );
 
-  // WAJIB: Pake getUser() buat security, jangan getSession()
+  // PENTING: getUser() ini yang bakal nge-hit API Supabase beneran
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const url = request.nextUrl.clone();
+  // LOG BIAR LU TAU DI TERMINAL:
+  // console.log("PATH:", request.nextUrl.pathname, "USER ADA?", !!user);
 
-  // 1. Kalo mau ke /admin tapi belum login -> Tendang ke /login
-  if (url.pathname.startsWith("/admin") && !user) {
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+  if (request.nextUrl.pathname.startsWith("/admin") && !user) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 2. Kalo udah login tapi malah ke /login -> Balikin ke /admin
-  if (url.pathname.startsWith("/login") && user) {
-    url.pathname = "/admin";
-    return NextResponse.redirect(url);
+  if (request.nextUrl.pathname.startsWith("/login") && user) {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return response;
 }
 
+// ... config matcher tetap sama
+
 export const config = {
-  // Biar gak berat, kita filter request file statis
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],

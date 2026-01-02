@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BagusBlog",
-  description: "Dibuat dengan gabut wkwk",
+  description: "Dibuat dengan gabut dan kopi",
 };
 
 export default function RootLayout({

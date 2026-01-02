@@ -118,10 +118,37 @@ export default function AdminPage() {
   }, [editId, editor, posts]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    setLoading(true); // Biar ada feedback pas klik
+    try {
+      await supabase.auth.signOut();
+      // Clear cookies manual (optional tapi manjur buat jaga-jaga)
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      // Pake window.location biar proxy.ts kepanggil fresh dari server
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Gagal logout bray", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        router.push("/login");
+        router.refresh();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
