@@ -20,7 +20,8 @@ export default function AdminPage() {
     extensions: [
       StarterKit,
       TextAlign.configure({
-        types: ["heading", "paragraph"], // Pasang alignment buat judul & paragraf
+        types: ["heading", "paragraph"],
+        alignments: ["left", "center", "right", "justify"], // <--- PASTIIN JUSTIFY ADA DI SINI
       }),
     ],
     content: "",
@@ -297,6 +298,23 @@ export default function AdminPage() {
                           {" "}
                           <AlignRightIcon />{" "}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            editor
+                              ?.chain()
+                              .focus()
+                              .setTextAlign("justify")
+                              .run()
+                          }
+                          className={`p-2 rounded-xl transition-all ${
+                            editor?.isActive({ textAlign: "justify" })
+                              ? "bg-blue-500 text-white"
+                              : "text-gray-400 hover:text-white"
+                          }`}
+                        >
+                          <AlignJustifyIcon />
+                        </button>
                       </div>
                     </div>
                     <EditorContent editor={editor} />
@@ -476,6 +494,24 @@ const AlignRightIcon = () => (
     <line x1="21" y1="6" x2="3" y2="6"></line>
     <line x1="21" y1="14" x2="3" y2="14"></line>
     <line x1="21" y1="18" x2="7" y2="18"></line>
+  </svg>
+);
+const AlignJustifyIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="21" y1="10" x2="3" y2="10"></line>
+    <line x1="21" y1="6" x2="3" y2="6"></line>
+    <line x1="21" y1="14" x2="3" y2="14"></line>
+    <line x1="21" y1="18" x2="3" y2="18"></line>
   </svg>
 );
 const EditIcon = () => (

@@ -12,13 +12,14 @@ export default async function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-red-500 font-bold p-10">
         Error: {error.message}
-      </div> // Sudah bener di sini bray
+      </div>
     );
   }
 
   return (
     <main className="min-h-screen bg-gray-50 text-black p-6 md:p-12 font-sans">
       <div className="max-w-3xl mx-auto">
+        {/* Header Kece */}
         <header className="flex justify-between items-center mb-16">
           <div className="flex flex-col">
             <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
@@ -36,6 +37,7 @@ export default async function Home() {
           </Link>
         </header>
 
+        {/* List Postingan */}
         <div className="flex flex-col gap-16">
           {posts && posts.length > 0 ? (
             posts.map((post: any) => (
@@ -59,9 +61,12 @@ export default async function Home() {
                       {post.title}
                     </h2>
                   </Link>
-                  <p className="text-gray-600 leading-relaxed text-lg line-clamp-3 mb-8">
-                    {post.content}
-                  </p>
+
+                  {/* INI KUNCI SAKTINYA BRAY: Render HTML + Styling Typography */}
+                  <div
+                    className="prose prose-blue prose-lg text-gray-600 leading-relaxed line-clamp-3 mb-8 max-w-none"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
 
                   <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div className="flex flex-col">
@@ -76,11 +81,14 @@ export default async function Home() {
                         })}
                       </span>
                     </div>
-                    <div className="h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <Link
+                      href={`/blog/${post.id}`}
+                      className="h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-all"
+                    >
                       <span className="group-hover:translate-x-0.5 transition-transform">
                         →
                       </span>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </article>
