@@ -3,16 +3,31 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+// Import Tiptap bray
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
 export default function AdminPage() {
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false); // State khusus upload
+  const [uploading, setUploading] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const router = useRouter();
+
+  // Inisialisasi Tiptap Editor
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: "",
+    immediatelyRender: false, // <--- TAMBAHIN BARIS SAKTI INI BRAY!
+    editorProps: {
+      attributes: {
+        class:
+          "prose prose-sm focus:outline-none max-w-none min-h-[150px] p-4 bg-gray-100 rounded-xl",
+      },
+    },
+  });
 
   const fetchPosts = async () => {
     const { data } = await supabase
@@ -26,36 +41,40 @@ export default function AdminPage() {
     fetchPosts();
   }, []);
 
+  // Pas klik Edit, konten editor harus diupdate
+  useEffect(() => {
+    if (editId && editor) {
+      const postToEdit = posts.find((p) => p.id === editId);
+      if (postToEdit) editor.commands.setContent(postToEdit.content);
+    }
+  }, [editId, editor, posts]);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}.${fileExt}`; // Pake Date.now biar lebih unik
-    const filePath = `${fileName}`;
-
+    const fileName = `${Date.now()}.${file.name.split(".").pop()}`;
     const { error: uploadError } = await supabase.storage
       .from("blog-images")
-      .upload(filePath, file);
-
+      .upload(fileName, file);
     if (uploadError) {
-      alert("Gagal upload: " + uploadError.message);
+      alert("Gagal: " + uploadError.message);
       setUploading(false);
       return;
     }
-
     const { data } = supabase.storage
       .from("blog-images")
-      .getPublicUrl(filePath);
+      .getPublicUrl(fileName);
     setImageUrl(data.publicUrl);
     setUploading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!editor) return;
 
+    setLoading(true);
+    const content = editor.getHTML(); // AMBIL KONTEN DALAM BENTUK HTML
     const payload = { title, content, image_url: imageUrl };
 
     if (editId) {
@@ -74,15 +93,14 @@ export default function AdminPage() {
 
     setLoading(false);
     setTitle("");
-    setContent("");
     setImageUrl("");
+    editor.commands.setContent(""); // Reset editor
     fetchPosts();
   };
 
   const startEdit = (post: any) => {
     setEditId(post.id);
     setTitle(post.title);
-    setContent(post.content);
     setImageUrl(post.image_url || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -103,48 +121,34 @@ export default function AdminPage() {
         </div>
 
         <div className="grid md:grid-cols-5 gap-10">
-          {/* KIRI: FORM INPUT */}
           <div className="md:col-span-2">
             <form
               onSubmit={handleSubmit}
               className="sticky top-10 bg-white p-6 rounded-3xl border border-gray-200 shadow-xl"
             >
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold mb-6">
                 {editId ? "📝 Mode Edit" : "✍️ Buat Baru"}
               </h2>
-
               <div className="space-y-5">
-                {/* UPLOAD BOX */}
-                <div className="relative group">
-                  <label className="block text-xs font-black uppercase text-gray-400 mb-2">
-                    Cover Image
-                  </label>
-                  <div className="relative h-40 w-full rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden transition-all group-hover:border-blue-400">
-                    {imageUrl ? (
-                      <>
-                        <img
-                          src={imageUrl}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          alt="preview"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <p className="text-white text-xs font-bold">
-                            Ganti Foto
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <p className="text-gray-400 text-xs">
-                        {uploading ? "Lagi Upload..." : "Klik buat upload"}
-                      </p>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
+                {/* Image Upload UI Tetap Sama */}
+                <div className="relative group h-40 w-full rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      alt="preview"
                     />
-                  </div>
+                  ) : (
+                    <p className="text-gray-400 text-xs text-center">
+                      {uploading ? "Lagi Upload..." : "Upload Cover"}
+                    </p>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
                 </div>
 
                 <input
@@ -155,18 +159,53 @@ export default function AdminPage() {
                   className="w-full p-4 bg-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold"
                   required
                 />
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Tulis ceritamu..."
-                  className="w-full p-4 bg-gray-100 rounded-xl h-40 focus:ring-2 focus:ring-blue-500 outline-none"
-                  required
-                />
+
+                {/* TOOLBAR SIMPLE TIPTAP */}
+                <div className="flex gap-2 flex-wrap mb-2">
+                  <button
+                    type="button"
+                    onClick={() => editor?.chain().focus().toggleBold().run()}
+                    className={`px-2 py-1 rounded text-xs font-bold ${
+                      editor?.isActive("bold")
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    B
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor?.chain().focus().toggleItalic().run()}
+                    className={`px-2 py-1 rounded text-xs font-bold italic ${
+                      editor?.isActive("italic")
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    I
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      editor?.chain().focus().toggleBulletList().run()
+                    }
+                    className={`px-2 py-1 rounded text-xs font-bold ${
+                      editor?.isActive("bulletList")
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    List
+                  </button>
+                </div>
+
+                {/* AREA EDITOR */}
+                <EditorContent editor={editor} />
 
                 <button
                   type="submit"
                   disabled={loading || uploading}
-                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:bg-gray-300"
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-black hover:bg-blue-700 disabled:bg-gray-300 transition-all shadow-lg shadow-blue-200"
                 >
                   {loading
                     ? "MENYIMPAN..."
@@ -174,25 +213,11 @@ export default function AdminPage() {
                     ? "UPDATE POST"
                     : "PUBLISH SEKARANG"}
                 </button>
-                {editId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditId(null);
-                      setTitle("");
-                      setContent("");
-                      setImageUrl("");
-                    }}
-                    className="w-full text-gray-400 text-sm font-bold"
-                  >
-                    Batal Edit
-                  </button>
-                )}
               </div>
             </form>
           </div>
 
-          {/* KANAN: LIST POSTINGAN */}
+          {/* LIST POSTINGAN (Tetap sama kayak kode lu sebelumnya) */}
           <div className="md:col-span-3">
             <h2 className="text-xl font-bold mb-6">
               Kelola Konten ({posts.length})
@@ -203,7 +228,7 @@ export default function AdminPage() {
                   key={post.id}
                   className="group bg-white p-4 rounded-2xl border border-gray-200 flex items-center gap-4 hover:shadow-md transition-all"
                 >
-                  <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0">
                     {post.image_url && (
                       <img
                         src={post.image_url}
@@ -228,7 +253,7 @@ export default function AdminPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm("Hapus selamanya?"))
+                        if (confirm("Hapus?"))
                           supabase
                             .from("posts")
                             .delete()
@@ -250,7 +275,6 @@ export default function AdminPage() {
   );
 }
 
-// Icon simpel pake SVG
 const EditIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

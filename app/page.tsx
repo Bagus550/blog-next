@@ -24,10 +24,12 @@ export default async function Home() {
             <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
               Blog Kece Gw 🚀
             </h1>
-            <p className="text-gray-400 font-medium mt-1">Tempat berbagi cerita random.</p>
+            <p className="text-gray-400 font-medium mt-1">
+              Tempat berbagi cerita random.
+            </p>
           </div>
-          <Link 
-            href="/admin" 
+          <Link
+            href="/admin"
             className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-transform shadow-lg"
           >
             Admin 🛠️
@@ -37,10 +39,12 @@ export default async function Home() {
         <div className="flex flex-col gap-16">
           {posts && posts.length > 0 ? (
             posts.map((post: any) => (
-              <article key={post.id} className="group relative bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
-                
+              <article
+                key={post.id}
+                className="group relative bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300"
+              >
                 {post.image_url && (
-                  <div className="mb-8 overflow-hidden rounded-[2rem] bg-gray-100 aspect-video border border-gray-50">
+                  <div className="mb-8 overflow-hidden rounded-4xl bg-gray-100 aspect-video border border-gray-50">
                     <img
                       src={post.image_url}
                       alt={post.title}
@@ -50,26 +54,32 @@ export default async function Home() {
                 )}
 
                 <div className="px-2">
-                  <h2 className="text-3xl font-black text-gray-900 mb-4 hover:text-blue-600 transition-colors cursor-pointer leading-tight">
-                    {post.title}
-                  </h2>
+                  <Link href={`/blog/${post.id}`}>
+                    <h2 className="text-3xl font-black text-gray-900 mb-4 hover:text-blue-600 transition-colors cursor-pointer leading-tight">
+                      {post.title}
+                    </h2>
+                  </Link>
                   <p className="text-gray-600 leading-relaxed text-lg line-clamp-3 mb-8">
                     {post.content}
                   </p>
 
                   <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-300 font-black uppercase tracking-widest">Post Date</span>
+                      <span className="text-[10px] text-gray-300 font-black uppercase tracking-widest">
+                        Post Date
+                      </span>
                       <span className="text-sm text-gray-400 font-bold">
-                        {new Date(post.created_at).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
+                        {new Date(post.created_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
                         })}
                       </span>
                     </div>
                     <div className="h-10 w-10 flex items-center justify-center bg-gray-100 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-all">
-                      <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">
+                        →
+                      </span>
                     </div>
                   </div>
                 </div>
