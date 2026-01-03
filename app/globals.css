@@ -1,14 +1,35 @@
-/* app/globals.css */
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* Sembunyiin scrollbar tapi tetep bisa digeser */
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+@theme {
+  --color-gray-950: #0a0a0a;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html.dark { 
+    color-scheme: dark; 
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+
+  body {
+    @apply bg-white text-black transition-colors duration-500;
+  }
+
+  .dark body {
+    background-color: var(--color-gray-950);
+    color: white;
+  }
+
+  /* Targetin Tiptap biar gak rese */
+  .tiptap, .ProseMirror {
+    outline: none !important;
+  }
+
+  /* Pas mode dark, pastiin editor transparan biar ngikut warna layout */
+  .dark .tiptap, 
+  .dark .ProseMirror {
+    background-color: transparent !important;
+    color: white !important;
   }
 }

@@ -10,7 +10,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Bikin client browser di sini bray
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -29,10 +28,7 @@ export default function LoginPage() {
       alert("Gagal login bray: " + error.message);
       setLoading(false);
     } else {
-      // REFRESH dulu biar proxy.ts baca cookie terbaru
       router.refresh();
-
-      // Kasih delay dikit biar proses tulis cookie kelar
       setTimeout(() => {
         router.push("/admin");
       }, 150);
@@ -40,36 +36,39 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-md bg-white p-6 sm:p-10 rounded-4xl sm:rounded-[2.5rem] shadow-2xl border border-gray-100">
-        <h1 className="text-2xl sm:text-3xl font-black mb-6 sm:mb-8 tracking-tighter text-center">
-          LOGIN ADMIN 🔐
+    // Update main background biar gak belang
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 sm:p-6 font-sans transition-colors duration-500">
+      {/* Update Card: bg-white jadi dark:bg-gray-900. text-gray-900 biar kelihatan di mode terang */}
+      <div className="w-full max-w-md bg-white dark:bg-gray-900 p-6 sm:p-10 rounded-4xl sm:rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white transition-all">
+        <h1 className="text-2xl sm:text-3xl font-black mb-6 sm:mb-8 tracking-tighter text-center uppercase">
+          Login Admin 🔐
         </h1>
 
         <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">
+            <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 tracking-widest">
               Email
             </label>
             <input
               type="email"
               value={email}
               placeholder="email kamu"
-              className="w-full p-3.5 sm:p-4 bg-gray-50 rounded-xl sm:rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-black transition-all text-sm sm:text-base"
+              // Input di dark mode: bg lebih gelap, text putih, ring menyesuaikan
+              className="w-full p-3.5 sm:p-4 bg-gray-50 dark:bg-gray-950 dark:text-white rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-800 outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm sm:text-base placeholder:dark:text-gray-700"
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">
+            <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 tracking-widest">
               Password
             </label>
             <input
               type="password"
               value={password}
               placeholder="Password Kamu"
-              className="w-full p-3.5 sm:p-4 bg-gray-50 rounded-xl sm:rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-black transition-all text-sm sm:text-base"
+              className="w-full p-3.5 sm:p-4 bg-gray-50 dark:bg-gray-950 dark:text-white rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-800 outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm sm:text-base placeholder:dark:text-gray-700"
               onChange={(e) => setPassword(e.target.value)}
               required
             />
@@ -78,17 +77,17 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold hover:scale-[1.01] active:scale-95 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base mt-2"
+            // Tombol dibalik warnanya pas Dark Mode biar tetep kontras
+            className="w-full bg-black dark:bg-white text-white dark:text-black py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold hover:scale-[1.01] active:scale-95 transition-all disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base mt-2"
           >
             {loading ? "PROSES BRAY..." : "MASUK SEKARANG"}
           </button>
         </form>
 
-        {/* Opsional: Tombol balik ke home biar user gak kejebak */}
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="text-xs font-bold text-gray-300 hover:text-black transition-colors uppercase tracking-widest"
+            className="text-xs font-bold text-gray-300 dark:text-gray-600 hover:text-black dark:hover:text-white transition-colors uppercase tracking-widest"
           >
             ← Balik ke Blog
           </Link>

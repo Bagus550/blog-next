@@ -198,22 +198,21 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 md:p-12 font-sans">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-12 font-sans transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
-        {/* Header: Stack di mobile, row di desktop */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 md:mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase dark:text-white">
               Editor Konten ✍️
             </h1>
-            <p className="text-gray-400 font-bold text-xs md:text-sm">
+            <p className="text-gray-400 dark:text-gray-500 font-bold text-xs md:text-sm">
               Welcome back, Admin Kece!
             </p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <button
               onClick={() => router.push("/")}
-              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-white border border-gray-200 px-4 md:px-6 py-2.5 rounded-full hover:bg-gray-50"
+              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 dark:text-gray-300 px-4 md:px-6 py-2.5 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
             >
               Home
             </button>
@@ -227,16 +226,15 @@ export default function AdminPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 mb-20">
-          {/* Card Utama: Padding lebih kecil di mobile */}
-          <div className="bg-white p-5 sm:p-8 rounded-4xl md:rounded-[3rem] shadow-2xl border border-gray-100">
-            <h2 className="text-xl md:text-2xl font-black mb-6 md:mb-8 text-center sm:text-left">
+          <div className="bg-white dark:bg-gray-900 p-5 sm:p-8 rounded-4xl md:rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800">
+            <h2 className="text-xl md:text-2xl font-black mb-6 md:mb-8 text-center sm:text-left dark:text-white">
               {editId ? "📝 Edit Postingan" : "🚀 Buat Postingan Baru"}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8">
               <div className="md:col-span-2 space-y-6">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 mb-2 block ml-1">
                     Judul Artikel
                   </label>
                   <input
@@ -244,156 +242,165 @@ export default function AdminPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Kasih judul disini"
-                    className="w-full p-4 md:p-5 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-4 focus:ring-blue-100 outline-none font-bold text-lg md:text-xl transition-all"
+                    className="w-full p-4 md:p-5 bg-gray-50 dark:bg-gray-950 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 outline-none font-bold text-lg md:text-xl transition-all"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-1">
-                    Isi Konten
+                <div className="group transition-all duration-300">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 block ml-1 group-focus-within:text-blue-500 transition-colors">
+                    Isi Konten 🖋️
                   </label>
-                  {/* Toolbar: Sticky & Custom Scrollbar */}
-                  <div className="sticky top-2 z-20 bg-gray-900 rounded-2xl md:rounded-3xl border border-gray-900 shadow-xl overflow-hidden">
-                    <div className="flex items-center gap-1 p-1.5 md:p-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
-                      {/* GROUP 1: HEADINGS */}
-                      <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
-                        {[1, 2, 3].map((l) => (
+
+                  <div className="relative border-2 border-gray-100 dark:border-gray-800 rounded-4xl overflow-hidden bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 group-focus-within:shadow-2xl group-focus-within:shadow-blue-100/50 dark:group-focus-within:shadow-blue-900/20 transition-all duration-500">
+                    {/* Toolbar Dark Mode */}
+                    <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-3 py-2">
+                      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
+                        {/* GROUP 1: HEADINGS */}
+                        <div className="flex bg-gray-50 dark:bg-gray-950 p-1 rounded-xl shrink-0">
+                          {[1, 2, 3].map((l) => (
+                            <button
+                              key={l}
+                              type="button"
+                              onClick={() =>
+                                editor
+                                  ?.chain()
+                                  .focus()
+                                  .toggleHeading({ level: l as any })
+                                  .run()
+                              }
+                              className={`w-9 h-9 flex items-center justify-center rounded-lg text-xs font-black transition-all ${
+                                editor?.isActive("heading", { level: l })
+                                  ? "bg-white dark:bg-gray-800 text-blue-600 shadow-sm"
+                                  : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                              }`}
+                            >
+                              H{l}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-1 shrink-0" />
+
+                        {/* GROUP 2: FORMATTING */}
+                        <div className="flex gap-1 shrink-0">
                           <button
-                            key={l}
                             type="button"
                             onClick={() =>
-                              editor
-                                ?.chain()
-                                .focus()
-                                .toggleHeading({ level: l as any })
-                                .run()
+                              editor?.chain().focus().toggleBold().run()
                             }
-                            className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black transition-all ${
-                              editor?.isActive("heading", { level: l })
-                                ? "bg-blue-500 text-white"
-                                : "text-gray-400 hover:text-white"
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                              editor?.isActive("bold")
+                                ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
-                            H{l}
+                            <strong className="text-sm">B</strong>
                           </button>
-                        ))}
-                      </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              editor?.chain().focus().toggleItalic().run()
+                            }
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                              editor?.isActive("italic")
+                                ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <em className="font-serif text-sm italic">I</em>
+                          </button>
+                        </div>
 
-                      {/* GROUP 2: FORMATTING */}
-                      <div className="flex gap-1 px-2 border-r border-gray-700 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().toggleBold().run()
-                          }
-                          className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold ${
-                            editor?.isActive("bold")
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                        >
-                          BOLD
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().toggleItalic().run()
-                          }
-                          className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold ${
-                            editor?.isActive("italic")
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                        >
-                          ITALIC
-                        </button>
-                      </div>
+                        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-1 shrink-0" />
 
-                      {/* GROUP 3: CODE & IMAGE */}
-                      <div className="flex gap-1 px-2 border-r border-gray-700 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().toggleCodeBlock().run()
-                          }
-                          className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black ${
-                            editor?.isActive("codeBlock")
-                              ? "bg-green-500 text-white"
-                              : "text-gray-400 hover:text-white"
-                          }`}
-                        >
-                          {"</>"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={addImageInContent}
-                          disabled={uploading}
-                          className="px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black text-gray-400 hover:text-white disabled:opacity-50"
-                        >
-                          {uploading ? "⌛" : "🖼️"}
-                        </button>
-                      </div>
+                        {/* GROUP 3: SPECIALS */}
+                        <div className="flex gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              editor?.chain().focus().toggleCodeBlock().run()
+                            }
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                              editor?.isActive("codeBlock")
+                                ? "bg-gray-900 dark:bg-white text-white dark:text-black"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <span className="text-[10px]">{"</>"}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={addImageInContent}
+                            disabled={uploading}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 transition-all disabled:opacity-30"
+                          >
+                            {uploading ? (
+                              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent animate-spin rounded-full" />
+                            ) : (
+                              "🖼️"
+                            )}
+                          </button>
+                        </div>
 
-                      {/* GROUP 4: ALIGNMENT */}
-                      <div className="flex gap-1 pl-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().setTextAlign("left").run()
-                          }
-                          className={`p-2 rounded-lg ${
-                            editor?.isActive({ textAlign: "left" })
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          <AlignLeftIcon />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().setTextAlign("center").run()
-                          }
-                          className={`p-2 rounded-lg ${
-                            editor?.isActive({ textAlign: "center" })
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          <AlignCenterIcon />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            editor?.chain().focus().setTextAlign("justify").run()
-                          }
-                          className={`p-2 rounded-lg ${
-                            editor?.isActive({ textAlign: "justify" })
-                            ? "bg-blue-500 text-white"
-                            : "text-gray-400"
-                          }`}
-                        >
-                          <AlignJustifyIcon/>
-                        </button>
+                        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-1 shrink-0" />
+
+                        {/* GROUP 4: ALIGNMENT */}
+                        <div className="flex gap-1 shrink-0">
+                          {[
+                            { name: "left", icon: <AlignLeftIcon /> },
+                            {
+                              name: "center",
+                              icon: <AlignCenterIcon />,
+                            },
+                            {
+                              name: "justify",
+                              icon: <AlignJustifyIcon />,
+                            },
+                          ].map((align) => (
+                            <button
+                              key={align.name}
+                              type="button"
+                              onClick={() =>
+                                editor
+                                  ?.chain()
+                                  .focus()
+                                  .setTextAlign(align.name)
+                                  .run()
+                              }
+                              className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                                editor?.isActive({ textAlign: align.name })
+                                  ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                                  : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
+                            >
+                              {align.icon}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="editor-container">
-                    <EditorContent
-                      editor={editor}
-                      className="min-h-75 border border-gray-100 rounded-b-2xl md:rounded-b-3xl p-4 bg-gray-50/50"
-                    />
+
+                    {/* Editor Area */}
+                    <div className="editor-container relative bg-white dark:bg-gray-950 transition-colors border-t dark:border-gray-800">
+                      <EditorContent
+                        editor={editor}
+                        className="min-h-100 p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
+                      />
+                      <div className="absolute bottom-4 right-6 text-[10px] font-bold text-gray-300 dark:text-gray-700 uppercase tracking-widest pointer-events-none">
+                        Tiptap Editor v2.0
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Sidebar Thumbnail & Submit */}
               <div className="space-y-6">
-                <label className="text-[10px] font-black uppercase text-gray-400 block ml-1">
+                <label className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 block ml-1">
                   Thumbnail
                 </label>
-                <div className="relative aspect-video rounded-3xl md:rounded-4xl border-4 border-dashed border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden group hover:border-blue-200 transition-all cursor-pointer">
+                <div className="relative aspect-video rounded-3xl md:rounded-4xl border-4 border-dashed border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex items-center justify-center overflow-hidden group hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
@@ -401,7 +408,7 @@ export default function AdminPage() {
                       alt="preview"
                     />
                   ) : (
-                    <div className="text-center p-4 text-gray-400 font-bold">
+                    <div className="text-center p-4 text-gray-400 dark:text-gray-500 font-bold">
                       <span className="text-2xl mb-1 block">📸</span>
                       <p className="text-[10px]">
                         {uploading ? "Uploading..." : "Klik upload"}
@@ -419,7 +426,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={loading || uploading}
-                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-4xl font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100"
+                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-4xl font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 dark:disabled:bg-gray-800 dark:disabled:text-gray-500 transition-all shadow-xl shadow-blue-100 dark:shadow-none"
                 >
                   {loading ? "PROSES..." : editId ? "SIMPAN" : "PUBLISH"}
                 </button>
@@ -427,9 +434,27 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      /* reset logic */
+                      if (
+                        confirm(
+                          "Yakin mau batalin editan lu bray? Semuanya bakal di-reset!"
+                        )
+                      ) {
+                        // 1. Reset input judul
+                        setTitle("");
+
+                        // 2. RESET TIPTAP (Ini kuncinya biar gak silau & kosong)
+                        if (editor) {
+                          editor.commands.clearContent(); // Bisa pake clearContent() atau setContent("")
+                        }
+
+                        setImageUrl("");
+                        
+                        setEditId(null);
+
+                        router.push("/admin");
+                      }
                     }}
-                    className="w-full text-red-500 font-bold text-xs uppercase tracking-widest"
+                    className="w-full text-red-500 font-bold text-xs uppercase tracking-widest hover:underline py-2"
                   >
                     Batal Edit
                   </button>
@@ -439,10 +464,10 @@ export default function AdminPage() {
           </div>
         </form>
 
-        {/* List Postingan: 1 kolom di mobile, 2 di desktop */}
+        {/* List Postingan */}
         <section>
-          <h2 className="text-xl md:text-2xl font-black mb-6 flex items-center gap-3">
-            <span className="bg-black text-white px-2.5 py-1 rounded-lg text-xs md:text-sm">
+          <h2 className="text-xl md:text-2xl font-black mb-6 flex items-center gap-3 dark:text-white">
+            <span className="bg-black dark:bg-white text-white dark:text-black px-2.5 py-1 rounded-lg text-xs md:text-sm">
               {posts.length}
             </span>
             Daftar Cerita Lu
@@ -451,9 +476,9 @@ export default function AdminPage() {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white p-4 md:p-5 rounded-4xl border border-gray-100 flex gap-4 items-center shadow-sm"
+                className="bg-white dark:bg-gray-900 p-4 md:p-5 rounded-4xl border border-gray-100 dark:border-gray-800 flex gap-4 items-center shadow-sm hover:shadow-md transition-all"
               >
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0">
                   {post.image_url && (
                     <img
                       src={post.image_url}
@@ -462,23 +487,23 @@ export default function AdminPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-gray-900 truncate text-sm md:text-base">
+                  <h3 className="font-bold text-gray-900 dark:text-white truncate text-sm md:text-base">
                     {post.title}
                   </h3>
-                  <p className="text-[10px] md:text-xs text-gray-400">
+                  <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">
                     {new Date(post.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex gap-1">
                   <button
                     onClick={() => setEditId(post.id)}
-                    className="p-2 md:p-3 hover:bg-blue-50 text-blue-600 rounded-xl"
+                    className="p-2 md:p-3 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl transition-colors"
                   >
                     <EditIcon />
                   </button>
                   <button
                     onClick={() => handleDelete(post.id)}
-                    className="p-2 md:p-3 hover:bg-red-50 text-red-500 rounded-xl"
+                    className="p-2 md:p-3 hover:bg-red-50 dark:hover:bg-red-900/40 text-red-500 rounded-xl transition-colors"
                   >
                     <TrashIcon />
                   </button>
