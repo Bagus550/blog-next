@@ -19,36 +19,36 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 text-black p-6 md:p-12 font-sans">
+    <main className="min-h-screen bg-gray-50 text-black p-4 sm:p-8 md:p-12 font-sans">
       <div className="max-w-3xl mx-auto">
-        {/* Header Kece */}
-        <header className="flex justify-between items-center mb-16">
+        {/* Header Kece - Dibuat flex-col kalau di HP biar gak sempit */}
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12 md:mb-16">
           <div className="flex flex-col">
-            <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
+            <h1 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter">
               BagusBlog
             </h1>
-            <p className="text-gray-400 font-medium mt-1">
+            <p className="text-gray-400 font-medium mt-1 text-sm md:text-base">
               Tempat berbagi cerita random.
             </p>
           </div>
           <Link
             href="/admin"
-            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-transform shadow-lg"
+            className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-transform shadow-lg"
           >
             Admin
           </Link>
         </header>
 
-        {/* List Postingan */}
-        <div className="flex flex-col gap-16">
+        {/* List Postingan - Jarak gap dikecilin dikit buat mobile */}
+        <div className="flex flex-col gap-10 md:gap-16">
           {posts && posts.length > 0 ? (
             posts.map((post: any) => (
               <article
                 key={post.id}
-                className="group relative bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300"
+                className="group relative bg-white p-5 md:p-8 rounded-4xl md:rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300"
               >
                 {post.image_url && (
-                  <div className="mb-8 overflow-hidden rounded-4xl bg-gray-100 aspect-video border border-gray-50">
+                  <div className="mb-6 md:mb-8 overflow-hidden rounded-2xl md:rounded-4xl bg-gray-100 aspect-video border border-gray-50">
                     <img
                       src={post.image_url}
                       alt={post.title}
@@ -57,25 +57,25 @@ export default async function Home() {
                   </div>
                 )}
 
-                <div className="px-2">
+                <div className="px-1 md:px-2">
                   <Link href={`/blog/${post.id}`}>
-                    <h2 className="text-3xl font-black text-gray-900 mb-4 hover:text-blue-600 transition-colors cursor-pointer leading-tight">
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 md:mb-4 hover:text-blue-600 transition-colors cursor-pointer leading-tight">
                       {post.title}
                     </h2>
                   </Link>
 
-                  {/* INI KUNCI SAKTINYA BRAY: Render HTML + Styling Typography */}
+                  {/* Render HTML + Styling Typography - Font size disesuaiin */}
                   <div
-                    className="prose prose-blue prose-lg text-gray-600 leading-relaxed line-clamp-3 mb-8 max-w-none"
+                    className="prose prose-sm md:prose-lg prose-blue text-gray-600 leading-relaxed line-clamp-3 mb-6 md:mb-8 max-w-none"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                   />
 
-                  <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+                  <div className="flex items-center justify-between pt-5 md:pt-6 border-t border-gray-50">
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-300 font-black uppercase tracking-widest">
+                      <span className="text-[9px] md:text-[10px] text-gray-300 font-black uppercase tracking-widest">
                         Post Date
                       </span>
-                      <span className="text-sm text-gray-400 font-bold">
+                      <span className="text-xs md:text-sm text-gray-400 font-bold">
                         {new Date(post.created_at).toLocaleDateString("id-ID", {
                           day: "numeric",
                           month: "long",
@@ -96,8 +96,8 @@ export default async function Home() {
               </article>
             ))
           ) : (
-            <div className="text-center p-20 border-4 border-dotted border-gray-200 rounded-[3rem] bg-white shadow-inner">
-              <p className="text-gray-400 text-xl font-medium">
+            <div className="text-center p-10 md:p-20 border-4 border-dotted border-gray-200 rounded-4xl md:rounded-[3rem] bg-white shadow-inner">
+              <p className="text-gray-400 text-lg md:text-xl font-medium">
                 Belum ada postingan nih. <br />
                 <Link
                   href="/admin"
@@ -110,7 +110,7 @@ export default async function Home() {
           )}
         </div>
 
-        <footer className="mt-24 pb-12 text-center text-gray-300 text-sm font-bold tracking-widest uppercase">
+        <footer className="mt-16 md:mt-24 pb-12 text-center text-gray-300 text-[10px] md:text-sm font-bold tracking-widest uppercase">
           © 2026 BagusBlog — Made with Next.js
         </footer>
       </div>

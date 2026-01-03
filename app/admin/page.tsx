@@ -190,9 +190,7 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (
-      confirm("Yakin mau hapus postingan?")
-    ) {
+    if (confirm("Yakin mau hapus postingan?")) {
       const { error } = await supabase.from("posts").delete().eq("id", id);
       if (error) alert("Gagal hapus: " + error.message);
       else fetchPosts();
@@ -200,27 +198,28 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 p-6 md:p-12 font-sans">
+    <main className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 md:p-12 font-sans">
       <div className="max-w-5xl mx-auto">
-        <header className="flex justify-between items-center mb-10">
+        {/* Header: Stack di mobile, row di desktop */}
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 md:mb-10">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter uppercase">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">
               Editor Konten ✍️
             </h1>
-            <p className="text-gray-400 font-bold text-sm">
+            <p className="text-gray-400 font-bold text-xs md:text-sm">
               Welcome back, Admin Kece!
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 w-full sm:w-auto">
             <button
               onClick={() => router.push("/")}
-              className="text-sm font-bold bg-white border border-gray-200 px-6 py-2 rounded-full hover:bg-gray-50"
+              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-white border border-gray-200 px-4 md:px-6 py-2.5 rounded-full hover:bg-gray-50"
             >
               Home
             </button>
             <button
               onClick={handleLogout}
-              className="text-sm font-bold bg-red-500 text-white px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-all"
+              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-red-500 text-white px-4 md:px-6 py-2.5 rounded-full shadow-lg hover:scale-105 transition-all"
             >
               Logout
             </button>
@@ -228,15 +227,16 @@ export default function AdminPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 mb-20">
-          <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-gray-100">
-            <h2 className="text-2xl font-black mb-8">
+          {/* Card Utama: Padding lebih kecil di mobile */}
+          <div className="bg-white p-5 sm:p-8 rounded-4xl md:rounded-[3rem] shadow-2xl border border-gray-100">
+            <h2 className="text-xl md:text-2xl font-black mb-6 md:mb-8 text-center sm:text-left">
               {editId ? "📝 Edit Postingan" : "🚀 Buat Postingan Baru"}
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8">
               <div className="md:col-span-2 space-y-6">
                 <div>
-                  <label className="text-xs font-black uppercase text-gray-400 mb-2 block">
+                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-1">
                     Judul Artikel
                   </label>
                   <input
@@ -244,18 +244,18 @@ export default function AdminPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Kasih judul disini"
-                    className="w-full p-5 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-4 focus:ring-blue-100 outline-none font-bold text-xl transition-all"
+                    className="w-full p-4 md:p-5 bg-gray-50 rounded-2xl border border-gray-100 focus:ring-4 focus:ring-blue-100 outline-none font-bold text-lg md:text-xl transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-black uppercase text-gray-400 mb-2 block">
+                  <label className="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-1">
                     Isi Konten
                   </label>
-                  <div className="sticky top-4 z-20 bg-gray-900 rounded-t-3xl border border-gray-900 shadow-xl overflow-hidden">
-                    {/* Container Scrollable */}
-                    <div className="flex items-center gap-2 p-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
+                  {/* Toolbar: Sticky & Custom Scrollbar */}
+                  <div className="sticky top-2 z-20 bg-gray-900 rounded-t-2xl md:rounded-t-3xl border border-gray-900 shadow-xl overflow-hidden">
+                    <div className="flex items-center gap-1 p-1.5 md:p-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
                       {/* GROUP 1: HEADINGS */}
                       <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
                         {[1, 2, 3].map((l) => (
@@ -269,7 +269,7 @@ export default function AdminPage() {
                                 .toggleHeading({ level: l as any })
                                 .run()
                             }
-                            className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
+                            className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black transition-all ${
                               editor?.isActive("heading", { level: l })
                                 ? "bg-blue-500 text-white"
                                 : "text-gray-400 hover:text-white"
@@ -281,13 +281,13 @@ export default function AdminPage() {
                       </div>
 
                       {/* GROUP 2: FORMATTING */}
-                      <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
+                      <div className="flex gap-1 px-2 border-r border-gray-700 shrink-0">
                         <button
                           type="button"
                           onClick={() =>
                             editor?.chain().focus().toggleBold().run()
                           }
-                          className={`px-4 py-2 rounded-xl text-xs font-bold ${
+                          className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold ${
                             editor?.isActive("bold")
                               ? "bg-blue-500 text-white"
                               : "text-gray-400 hover:text-white"
@@ -300,7 +300,7 @@ export default function AdminPage() {
                           onClick={() =>
                             editor?.chain().focus().toggleItalic().run()
                           }
-                          className={`px-4 py-2 rounded-xl text-xs font-bold ${
+                          className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold ${
                             editor?.isActive("italic")
                               ? "bg-blue-500 text-white"
                               : "text-gray-400 hover:text-white"
@@ -310,39 +310,39 @@ export default function AdminPage() {
                         </button>
                       </div>
 
-                      {/* GROUP 3: CODE & IMAGE*/}
-                      <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
+                      {/* GROUP 3: CODE & IMAGE */}
+                      <div className="flex gap-1 px-2 border-r border-gray-700 shrink-0">
                         <button
                           type="button"
                           onClick={() =>
                             editor?.chain().focus().toggleCodeBlock().run()
                           }
-                          className={`px-3 py-2 rounded-xl text-xs font-black ${
+                          className={`px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black ${
                             editor?.isActive("codeBlock")
                               ? "bg-green-500 text-white"
                               : "text-gray-400 hover:text-white"
                           }`}
                         >
-                          {"</> CODE"}
+                          {"</>"}
                         </button>
                         <button
                           type="button"
                           onClick={addImageInContent}
                           disabled={uploading}
-                          className="px-3 py-2 rounded-xl text-xs font-black text-gray-400 hover:text-white disabled:opacity-50"
+                          className="px-3 py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black text-gray-400 hover:text-white disabled:opacity-50"
                         >
-                          {uploading ? "⌛..." : "🖼️ IMAGE"}
+                          {uploading ? "⌛" : "🖼️"}
                         </button>
                       </div>
 
                       {/* GROUP 4: ALIGNMENT */}
-                      <div className="flex gap-1 shrink-0">
+                      <div className="flex gap-1 pl-2 shrink-0">
                         <button
                           type="button"
                           onClick={() =>
                             editor?.chain().focus().setTextAlign("left").run()
                           }
-                          className={`p-2 rounded-xl ${
+                          className={`p-2 rounded-lg ${
                             editor?.isActive({ textAlign: "left" })
                               ? "bg-blue-500 text-white"
                               : "text-gray-400"
@@ -355,7 +355,7 @@ export default function AdminPage() {
                           onClick={() =>
                             editor?.chain().focus().setTextAlign("center").run()
                           }
-                          className={`p-2 rounded-xl ${
+                          className={`p-2 rounded-lg ${
                             editor?.isActive({ textAlign: "center" })
                               ? "bg-blue-500 text-white"
                               : "text-gray-400"
@@ -366,32 +366,34 @@ export default function AdminPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            editor
-                              ?.chain()
-                              .focus()
-                              .setTextAlign("justify")
-                              .run()
+                            editor?.chain().focus().setTextAlign("justify").run()
                           }
-                          className={`p-2 rounded-xl ${
+                          className={`p-2 rounded-lg ${
                             editor?.isActive({ textAlign: "justify" })
-                              ? "bg-blue-500 text-white"
-                              : "text-gray-400"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-400"
                           }`}
                         >
-                          <AlignJustifyIcon />
+                          <AlignJustifyIcon/>
                         </button>
                       </div>
                     </div>
                   </div>
-                  <EditorContent editor={editor} />
+                  <div className="editor-container">
+                    <EditorContent
+                      editor={editor}
+                      className="min-h-75 border border-gray-100 rounded-b-2xl md:rounded-b-3xl p-4 bg-gray-50/50"
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* Sidebar Thumbnail & Submit */}
               <div className="space-y-6">
-                <label className="text-xs font-black uppercase text-gray-400 block">
+                <label className="text-[10px] font-black uppercase text-gray-400 block ml-1">
                   Thumbnail
                 </label>
-                <div className="relative aspect-video rounded-4xl border-4 border-dashed border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden group hover:border-blue-200 transition-all cursor-pointer">
+                <div className="relative aspect-video rounded-3xl md:rounded-4xl border-4 border-dashed border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden group hover:border-blue-200 transition-all cursor-pointer">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
@@ -399,10 +401,10 @@ export default function AdminPage() {
                       alt="preview"
                     />
                   ) : (
-                    <div className="text-center p-6 text-gray-400 font-bold">
-                      <span className="text-3xl mb-2 block">📸</span>
-                      <p className="text-xs">
-                        {uploading ? "Lagi upload bray..." : "Klik buat upload"}
+                    <div className="text-center p-4 text-gray-400 font-bold">
+                      <span className="text-2xl mb-1 block">📸</span>
+                      <p className="text-[10px]">
+                        {uploading ? "Uploading..." : "Klik upload"}
                       </p>
                     </div>
                   )}
@@ -417,24 +419,17 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={loading || uploading}
-                  className="w-full bg-blue-600 text-white py-6 rounded-4xl font-black text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100"
+                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-4xl font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100"
                 >
-                  {loading
-                    ? "LAGI PROSES..."
-                    : editId
-                    ? "SIMPAN PERUBAHAN"
-                    : "PUBLISH SEKARANG"}
+                  {loading ? "PROSES..." : editId ? "SIMPAN" : "PUBLISH"}
                 </button>
                 {editId && (
                   <button
                     type="button"
                     onClick={() => {
-                      setEditId(null);
-                      setTitle("");
-                      setImageUrl("");
-                      editor?.commands.setContent("");
+                      /* reset logic */
                     }}
-                    className="w-full text-red-500 font-bold text-sm"
+                    className="w-full text-red-500 font-bold text-xs uppercase tracking-widest"
                   >
                     Batal Edit
                   </button>
@@ -444,20 +439,21 @@ export default function AdminPage() {
           </div>
         </form>
 
+        {/* List Postingan: 1 kolom di mobile, 2 di desktop */}
         <section>
-          <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-            <span className="bg-black text-white px-3 py-1 rounded-lg text-sm">
+          <h2 className="text-xl md:text-2xl font-black mb-6 flex items-center gap-3">
+            <span className="bg-black text-white px-2.5 py-1 rounded-lg text-xs md:text-sm">
               {posts.length}
-            </span>{" "}
+            </span>
             Daftar Cerita Lu
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white p-5 rounded-4xl border border-gray-100 flex gap-4 items-center shadow-sm hover:shadow-md transition-all"
+                className="bg-white p-4 md:p-5 rounded-4xl border border-gray-100 flex gap-4 items-center shadow-sm"
               >
-                <div className="w-20 h-20 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gray-100 overflow-hidden shrink-0">
                   {post.image_url && (
                     <img
                       src={post.image_url}
@@ -466,23 +462,23 @@ export default function AdminPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-gray-900 truncate">
+                  <h3 className="font-bold text-gray-900 truncate text-sm md:text-base">
                     {post.title}
                   </h3>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-[10px] md:text-xs text-gray-400">
                     {new Date(post.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex gap-1">
                   <button
                     onClick={() => setEditId(post.id)}
-                    className="p-3 hover:bg-blue-50 text-blue-600 rounded-2xl"
+                    className="p-2 md:p-3 hover:bg-blue-50 text-blue-600 rounded-xl"
                   >
                     <EditIcon />
                   </button>
                   <button
                     onClick={() => handleDelete(post.id)}
-                    className="p-3 hover:bg-red-50 text-red-500 rounded-2xl"
+                    className="p-2 md:p-3 hover:bg-red-50 text-red-500 rounded-xl"
                   >
                     <TrashIcon />
                   </button>

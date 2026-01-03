@@ -1,8 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// ... (import tetap sama)
-
 export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -19,7 +17,6 @@ export default async function proxy(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          // Update request cookies biar getUser() dapet data terbaru
           request.cookies.set({ name, value, ...options });
           response = NextResponse.next({
             request: { headers: request.headers },
@@ -37,13 +34,9 @@ export default async function proxy(request: NextRequest) {
     }
   );
 
-  // PENTING: getUser() ini yang bakal nge-hit API Supabase beneran
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  // LOG BIAR LU TAU DI TERMINAL:
-  // console.log("PATH:", request.nextUrl.pathname, "USER ADA?", !!user);
 
   if (request.nextUrl.pathname.startsWith("/admin") && !user) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -55,8 +48,6 @@ export default async function proxy(request: NextRequest) {
 
   return response;
 }
-
-// ... config matcher tetap sama
 
 export const config = {
   matcher: [
