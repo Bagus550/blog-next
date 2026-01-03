@@ -198,7 +198,8 @@ export default function AdminPage() {
         title,
         content,
         image_url: imageUrl,
-        user_id: currentUserId, // <--- ID ASLI DARI AUTH
+        user_id: currentUserId,
+        author_name: adminName, // <--- TAMBAHIN BARIS INI BRAY!
         slug: title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
@@ -243,27 +244,29 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 p-4 sm:p-6 md:p-12 font-sans transition-colors duration-300">
+    <main className="min-h-screen bg-[#F0F7FF] dark:bg-gray-950 text-slate-800 dark:text-gray-100 p-4 sm:p-6 md:p-12 font-sans transition-colors duration-500">
       <div className="max-w-5xl mx-auto">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 md:mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase dark:text-white">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase text-blue-900 dark:text-white">
               Editor Konten ✍️
             </h1>
-            <p className="text-gray-400 dark:text-gray-500 font-bold text-xs md:text-sm">
-              Welcome back, Admin Kece!
+            <p className="text-blue-400 dark:text-blue-500 font-bold text-xs md:text-sm">
+              Welcome back,{" "}
+              <span className="text-blue-600">{adminName || "Admin Kece"}</span>
+              ! 🔥
             </p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <button
               onClick={() => router.push("/")}
-              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 dark:text-gray-300 px-4 md:px-6 py-2.5 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-white dark:bg-gray-900 border border-blue-100 dark:border-gray-800 text-blue-600 dark:text-gray-300 px-4 md:px-6 py-2.5 rounded-2xl hover:bg-blue-50 dark:hover:bg-gray-800 transition-all shadow-sm"
             >
               Home
             </button>
             <button
               onClick={handleLogout}
-              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-red-500 text-white px-4 md:px-6 py-2.5 rounded-full shadow-lg hover:scale-105 transition-all"
+              className="flex-1 sm:flex-none text-xs md:text-sm font-bold bg-red-500 text-white px-4 md:px-6 py-2.5 rounded-2xl shadow-lg shadow-red-200 dark:shadow-none hover:scale-105 transition-all"
             >
               Logout
             </button>
@@ -271,15 +274,15 @@ export default function AdminPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 mb-20">
-          <div className="bg-white dark:bg-gray-900 p-5 sm:p-8 rounded-4xl md:rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800">
-            <h2 className="text-xl md:text-2xl font-black mb-6 md:mb-8 text-center sm:text-left dark:text-white">
+          <div className="bg-white dark:bg-gray-900 p-5 sm:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 dark:border-gray-800">
+            <h2 className="text-xl md:text-2xl font-black mb-6 md:mb-8 text-center sm:text-left text-slate-800 dark:text-white">
               {editId ? "📝 Edit Postingan" : "🚀 Buat Postingan Baru"}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8">
               <div className="md:col-span-2 space-y-6">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 mb-2 block ml-1">
+                  <label className="text-[10px] font-black uppercase text-blue-300 dark:text-gray-500 mb-2 block ml-1">
                     Judul Artikel
                   </label>
                   <input
@@ -287,22 +290,22 @@ export default function AdminPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Kasih judul disini"
-                    className="w-full p-4 md:p-5 bg-gray-50 dark:bg-gray-950 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 outline-none font-bold text-lg md:text-xl transition-all"
+                    className="w-full p-4 md:p-5 bg-blue-50/50 dark:bg-gray-950 dark:text-white rounded-2xl border border-blue-100 dark:border-gray-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 outline-none font-bold text-lg md:text-xl transition-all"
                     required
                   />
                 </div>
 
                 <div className="group transition-all duration-300">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 block ml-1 group-focus-within:text-blue-500 transition-colors">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-300 dark:text-gray-500 mb-3 block ml-1 group-focus-within:text-blue-500 transition-colors">
                     Isi Konten 🖋️
                   </label>
 
-                  <div className="relative border-2 border-gray-100 dark:border-gray-800 rounded-4xl overflow-hidden bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 group-focus-within:shadow-2xl group-focus-within:shadow-blue-100/50 dark:group-focus-within:shadow-blue-900/20 transition-all duration-500">
+                  <div className="relative border-2 border-blue-50 dark:border-gray-800 rounded-[2rem] overflow-hidden bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 transition-all duration-500">
                     {/* Toolbar Dark Mode */}
-                    <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-3 py-2">
+                    <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-blue-50 dark:border-gray-800 px-3 py-2">
                       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
                         {/* GROUP 1: HEADINGS */}
-                        <div className="flex bg-gray-50 dark:bg-gray-950 p-1 rounded-xl shrink-0">
+                        <div className="flex bg-blue-50/50 dark:bg-gray-950 p-1 rounded-xl shrink-0">
                           {[1, 2, 3].map((l) => (
                             <button
                               key={l}
@@ -317,7 +320,7 @@ export default function AdminPage() {
                               className={`w-9 h-9 flex items-center justify-center rounded-lg text-xs font-black transition-all ${
                                 editor?.isActive("heading", { level: l })
                                   ? "bg-white dark:bg-gray-800 text-blue-600 shadow-sm"
-                                  : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                                  : "text-blue-300 dark:text-gray-500 hover:text-blue-500"
                               }`}
                             >
                               H{l}
@@ -325,7 +328,7 @@ export default function AdminPage() {
                           ))}
                         </div>
 
-                        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-1 shrink-0" />
+                        <div className="w-px h-6 bg-blue-100 dark:bg-gray-800 mx-1 shrink-0" />
 
                         {/* GROUP 2: FORMATTING */}
                         <div className="flex gap-1 shrink-0">
@@ -427,10 +430,10 @@ export default function AdminPage() {
                     </div>
 
                     {/* Editor Area */}
-                    <div className="editor-container relative bg-white dark:bg-gray-950 transition-colors border-t dark:border-gray-800">
+                    <div className="editor-container relative bg-white dark:bg-gray-950 transition-colors">
                       <EditorContent
                         editor={editor}
-                        className="min-h-100 p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
+                        className="min-h-[400px] p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
                       />
                       <div className="absolute bottom-4 right-6 text-[10px] font-bold text-gray-300 dark:text-gray-700 uppercase tracking-widest pointer-events-none">
                         Tiptap Editor v2.0
@@ -442,10 +445,10 @@ export default function AdminPage() {
 
               {/* Sidebar Thumbnail & Submit */}
               <div className="space-y-6">
-                <label className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 block ml-1">
+                <label className="text-[10px] font-black uppercase text-blue-300 dark:text-gray-500 block ml-1">
                   Thumbnail
                 </label>
-                <div className="relative aspect-video rounded-3xl md:rounded-4xl border-4 border-dashed border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex items-center justify-center overflow-hidden group hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer">
+                <div className="relative aspect-video rounded-[2rem] border-4 border-dashed border-blue-100 dark:border-gray-800 bg-blue-50/30 dark:bg-gray-950 flex items-center justify-center overflow-hidden group hover:border-blue-300 transition-all cursor-pointer">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
@@ -453,7 +456,7 @@ export default function AdminPage() {
                       alt="preview"
                     />
                   ) : (
-                    <div className="text-center p-4 text-gray-400 dark:text-gray-500 font-bold">
+                    <div className="text-center p-4 text-blue-300 dark:text-gray-500 font-bold">
                       <span className="text-2xl mb-1 block">📸</span>
                       <p className="text-[10px]">
                         {uploading ? "Uploading..." : "Klik upload"}
@@ -471,19 +474,19 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={loading || uploading}
-                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-4xl font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 dark:disabled:bg-gray-800 dark:disabled:text-gray-500 transition-all shadow-xl shadow-blue-100 dark:shadow-none"
+                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-[2rem] font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100 dark:shadow-none"
                 >
-                  {loading ? "PROSES..." : editId ? "SIMPAN" : "PUBLISH"}
+                  {loading
+                    ? "PROSES..."
+                    : editId
+                    ? "SIMPAN"
+                    : "PUBLISH SEKARANG"}
                 </button>
                 {editId && (
                   <button
                     type="button"
                     onClick={() => {
-                      if (
-                        confirm(
-                          "Yakin mau batalin editan lu bray? Semuanya bakal di-reset!"
-                        )
-                      ) {
+                      if (confirm("Yakin batalkan edit?")) {
                         // 1. Reset input judul
                         setTitle("");
 
@@ -510,9 +513,9 @@ export default function AdminPage() {
         </form>
 
         {/* List Postingan */}
-        <section>
-          <h2 className="text-xl md:text-2xl font-black mb-6 flex items-center gap-3 dark:text-white">
-            <span className="bg-black dark:bg-white text-white dark:text-black px-2.5 py-1 rounded-lg text-xs md:text-sm">
+        <section className="mb-20">
+          <h2 className="text-xl md:text-2xl font-black mb-6 flex items-center gap-3 text-slate-800 dark:text-white">
+            <span className="bg-blue-600 text-white px-3 py-1 rounded-xl text-xs md:text-sm">
               {posts.length}
             </span>
             Daftar Cerita Lu
@@ -521,9 +524,10 @@ export default function AdminPage() {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white dark:bg-gray-900 p-4 md:p-5 rounded-4xl border border-gray-100 dark:border-gray-800 flex gap-4 items-center shadow-sm hover:shadow-md transition-all"
+                className="bg-white dark:bg-gray-900 p-4 md:p-5 rounded-[2rem] border border-blue-50 dark:border-gray-800 flex gap-4 items-center shadow-sm hover:shadow-blue-200/20 transition-all"
               >
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden shrink-0">
+                {/* Thumbnail Kecil */}
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-blue-100 dark:border-gray-700">
                   {post.image_url && (
                     <img
                       src={post.image_url}
@@ -531,24 +535,32 @@ export default function AdminPage() {
                     />
                   )}
                 </div>
+
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-gray-900 dark:text-white truncate text-sm md:text-base">
+                  <h3 className="font-bold text-slate-800 dark:text-white truncate text-sm md:text-base">
                     {post.title}
                   </h3>
-                  <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(post.created_at).toLocaleDateString()}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] font-black bg-blue-50 dark:bg-blue-900/40 text-blue-500 px-2 py-0.5 rounded-lg uppercase">
+                      {post.author_name || "Admin"}
+                    </span>
+                    <p className="text-[10px] text-slate-400 dark:text-gray-500 font-medium">
+                      {new Date(post.created_at).toLocaleDateString("id-ID")}
+                    </p>
+                  </div>
                 </div>
+
+                {/* Action Buttons */}
                 <div className="flex gap-1">
                   <button
                     onClick={() => setEditId(post.id)}
-                    className="p-2 md:p-3 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl transition-colors"
+                    className="p-2 md:p-3 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-blue-500 rounded-xl transition-colors"
                   >
                     <EditIcon />
                   </button>
                   <button
                     onClick={() => handleDelete(post.id)}
-                    className="p-2 md:p-3 hover:bg-red-50 dark:hover:bg-red-900/40 text-red-500 rounded-xl transition-colors"
+                    className="p-2 md:p-3 hover:bg-red-50 dark:hover:bg-red-900/40 text-red-400 rounded-xl transition-colors"
                   >
                     <TrashIcon />
                   </button>
