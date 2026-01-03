@@ -29,19 +29,26 @@ export default function AdminPage() {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
+        heading: { levels: [1, 2, 3] },
         codeBlock: false,
+        // Matiin bulletList & orderedList bawaan starter-kit biar gak konflik
+        bulletList: false,
+        orderedList: false,
       }),
+      // DAFTARIN EXTENSION LIST-NYA DI SINI BRAY!
+      BulletList.configure({
+        HTMLAttributes: { class: "list-disc ml-4 space-y-1" },
+      }),
+      OrderedList.configure({
+        HTMLAttributes: { class: "list-decimal ml-4 space-y-1" },
+      }),
+      ListItem,
       Image.configure({
         HTMLAttributes: {
           class: "rounded-3xl shadow-lg max-w-full h-auto my-8 mx-auto block",
         },
       }),
-      CodeBlockLowlight.configure({
-        lowlight,
-      }),
+      CodeBlockLowlight.configure({ lowlight }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
         alignments: ["left", "center", "right", "justify"],
@@ -51,8 +58,9 @@ export default function AdminPage() {
     immediatelyRender: false,
     editorProps: {
       attributes: {
+        // Hapus border-x b sama rounded-b di sini biar gak dobel sama container luar
         class:
-          "prose prose-lg focus:outline-none max-w-none min-h-[400px] p-6 bg-white rounded-b-3xl border-x border-b border-gray-200 shadow-inner",
+          "prose prose-lg focus:outline-none max-w-none min-h-[400px] p-6 dark:text-white dark:prose-invert",
       },
     },
   });
@@ -117,7 +125,7 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (editId && editor) {
+    if (editId && editor && posts.length > 0) {
       const postToEdit = posts.find((p) => p.id === editId);
       if (postToEdit) {
         editor.commands.setContent(postToEdit.content);
@@ -125,7 +133,7 @@ export default function AdminPage() {
         setImageUrl(postToEdit.image_url || "");
       }
     }
-  }, [editId, editor, posts]);
+  }, [editId, editor]);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -299,13 +307,13 @@ export default function AdminPage() {
                 </div>
 
                 <div className="group transition-all duration-300">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-300 dark:text-gray-500 mb-3 block ml-1 group-focus-within:text-blue-500 transition-colors">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-300 dark:text-gray-500 mb-3 block ml-1">
                     Isi Konten 🖋️
                   </label>
 
-                  <div className="relative border-2 border-blue-50 dark:border-gray-800 rounded-4xl overflow-hidden bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 transition-all duration-500">
+                  <div className="relative border-2 border-blue-50 dark:border-gray-800 rounded-4xl bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 transition-all duration-500">
                     {/* Toolbar Dark Mode */}
-                    <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-blue-50 dark:border-gray-800 px-3 py-2">
+                    <div className="sticky top-0 z-[50] bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-blue-50 dark:border-gray-800 px-3 py-2 rounded-t-4xl shadow-sm">
                       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
                         {/* GROUP 1: HEADINGS */}
                         <div className="flex bg-blue-50/50 dark:bg-gray-950 p-1 rounded-xl shrink-0">
@@ -462,10 +470,11 @@ export default function AdminPage() {
                     </div>
 
                     {/* Editor Area */}
-                    <div className="editor-container relative bg-white dark:bg-gray-950 transition-colors">
+                    {/* Editor Area */}
+                    <div className="editor-container relative bg-white dark:bg-gray-950 rounded-b-4xl transition-colors">
                       <EditorContent
                         editor={editor}
-                        className="min-h-100 p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
+                        className="min-h-[400px] p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
                       />
                       <div className="absolute bottom-4 right-6 text-[10px] font-bold text-gray-300 dark:text-gray-700 uppercase tracking-widest pointer-events-none">
                         Tiptap Editor v2.0
