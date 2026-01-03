@@ -254,7 +254,7 @@ export default function AdminPage() {
                     Isi Konten
                   </label>
                   {/* Toolbar: Sticky & Custom Scrollbar */}
-                  <div className="sticky top-2 z-20 bg-gray-900 rounded-t-2xl md:rounded-t-3xl border border-gray-900 shadow-xl overflow-hidden">
+                  <div className="sticky top-2 z-20 bg-gray-900 rounded-2xl md:rounded-3xl border border-gray-900 shadow-xl overflow-hidden">
                     <div className="flex items-center gap-1 p-1.5 md:p-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
                       {/* GROUP 1: HEADINGS */}
                       <div className="flex gap-1 pr-2 border-r border-gray-700 shrink-0">
