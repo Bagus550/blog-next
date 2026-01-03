@@ -9,6 +9,9 @@ import TextAlign from "@tiptap/extension-text-align";
 import Image from "@tiptap/extension-image";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
 
 const lowlight = createLowlight(common);
 
@@ -300,7 +303,7 @@ export default function AdminPage() {
                     Isi Konten 🖋️
                   </label>
 
-                  <div className="relative border-2 border-blue-50 dark:border-gray-800 rounded-[2rem] overflow-hidden bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 transition-all duration-500">
+                  <div className="relative border-2 border-blue-50 dark:border-gray-800 rounded-4xl overflow-hidden bg-white dark:bg-gray-950 shadow-sm group-focus-within:border-blue-500/30 transition-all duration-500">
                     {/* Toolbar Dark Mode */}
                     <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-blue-50 dark:border-gray-800 px-3 py-2">
                       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
@@ -357,6 +360,35 @@ export default function AdminPage() {
                             }`}
                           >
                             <em className="font-serif text-sm italic">I</em>
+                          </button>
+                          {/* Tombol Bullet List */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              editor?.chain().focus().toggleBulletList().run()
+                            }
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                              editor?.isActive("bulletList")
+                                ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <span className="text-lg">#</span>
+                          </button>
+
+                          {/* Tombol Ordered List */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              editor?.chain().focus().toggleOrderedList().run()
+                            }
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+                              editor?.isActive("orderedList")
+                                ? "bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
+                          >
+                            <span className="text-sm font-black">1.</span>
                           </button>
                         </div>
 
@@ -433,7 +465,7 @@ export default function AdminPage() {
                     <div className="editor-container relative bg-white dark:bg-gray-950 transition-colors">
                       <EditorContent
                         editor={editor}
-                        className="min-h-[400px] p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
+                        className="min-h-100 p-6 md:p-10 focus:outline-none bg-transparent dark:text-white prose prose-sm md:prose-lg max-w-none dark:prose-invert"
                       />
                       <div className="absolute bottom-4 right-6 text-[10px] font-bold text-gray-300 dark:text-gray-700 uppercase tracking-widest pointer-events-none">
                         Tiptap Editor v2.0
@@ -448,7 +480,7 @@ export default function AdminPage() {
                 <label className="text-[10px] font-black uppercase text-blue-300 dark:text-gray-500 block ml-1">
                   Thumbnail
                 </label>
-                <div className="relative aspect-video rounded-[2rem] border-4 border-dashed border-blue-100 dark:border-gray-800 bg-blue-50/30 dark:bg-gray-950 flex items-center justify-center overflow-hidden group hover:border-blue-300 transition-all cursor-pointer">
+                <div className="relative aspect-video rounded-4xl border-4 border-dashed border-blue-100 dark:border-gray-800 bg-blue-50/30 dark:bg-gray-950 flex items-center justify-center overflow-hidden group hover:border-blue-300 transition-all cursor-pointer">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
@@ -474,7 +506,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={loading || uploading}
-                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-[2rem] font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100 dark:shadow-none"
+                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-2xl md:rounded-4xl font-black text-base md:text-lg hover:bg-blue-700 disabled:bg-gray-200 transition-all shadow-xl shadow-blue-100 dark:shadow-none"
                 >
                   {loading
                     ? "PROSES..."
@@ -518,13 +550,13 @@ export default function AdminPage() {
             <span className="bg-blue-600 text-white px-3 py-1 rounded-xl text-xs md:text-sm">
               {posts.length}
             </span>
-            Daftar Cerita Lu
+            Daftar Blog Kamu
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white dark:bg-gray-900 p-4 md:p-5 rounded-[2rem] border border-blue-50 dark:border-gray-800 flex gap-4 items-center shadow-sm hover:shadow-blue-200/20 transition-all"
+                className="bg-white dark:bg-gray-900 p-4 md:p-5 rounded-4xl border border-blue-50 dark:border-gray-800 flex gap-4 items-center shadow-sm hover:shadow-blue-200/20 transition-all"
               >
                 {/* Thumbnail Kecil */}
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 dark:bg-gray-800 overflow-hidden shrink-0 border border-blue-100 dark:border-gray-700">
