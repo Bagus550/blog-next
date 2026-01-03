@@ -19,6 +19,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [adminName, setAdminName] = useState("Admin");
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
 
   const editor = useEditor({
@@ -88,11 +90,23 @@ export default function AdminPage() {
   };
 
   const fetchPosts = async () => {
-    const { data } = await supabase
-      .from("posts")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setPosts(data);
+    // Ambil data user yang lagi aktif
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      setUserId(user.id);
+      setAdminName(user.user_metadata?.full_name || user.email?.split("@")[0]);
+
+      const { data } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", user.id) // <--- FILTER SAKTI!
+        .order("created_at", { ascending: false });
+
+      if (data) setPosts(data);
+    }
   };
 
   useEffect(() => {
@@ -163,30 +177,61 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editor) return;
     setLoading(true);
-    const content = editor.getHTML();
-    const payload = { title, content, image_url: imageUrl };
 
-    if (editId) {
-      const { error } = await supabase
-        .from("posts")
-        .update(payload)
-        .eq("id", editId);
-      if (!error) {
-        setEditId(null);
-        alert("Update Berhasil! ✨");
+    try {
+      // 1. Double check user langsung dari source-nya
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("Sesi lu abis bray, coba login lagi!");
+        router.push("/login");
+        return;
       }
-    } else {
-      const { error } = await supabase.from("posts").insert([payload]);
-      if (!error) alert("Postingan Rilis! 🚀");
-    }
 
-    setLoading(false);
-    setTitle("");
-    setImageUrl("");
-    editor.commands.setContent("");
-    fetchPosts();
+      const currentUserId = user.id; // Pake ini, jangan cuma userId dari state
+      const content = editor?.getHTML() || "";
+
+      const payload = {
+        title,
+        content,
+        image_url: imageUrl,
+        user_id: currentUserId, // <--- ID ASLI DARI AUTH
+        slug: title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, ""),
+      };
+
+      if (editId) {
+        const { error } = await supabase
+          .from("posts")
+          .update(payload)
+          .eq("id", editId)
+          .eq("user_id", currentUserId);
+
+        if (error) throw error;
+        alert("Update Berhasil! ✨");
+      } else {
+        const { error } = await supabase.from("posts").insert([payload]);
+        if (error) throw error;
+        alert("Postingan Rilis! 🚀");
+      }
+
+      // Reset form
+      setTitle("");
+      setImageUrl("");
+      editor?.commands.setContent("");
+      setEditId(null);
+      fetchPosts();
+    } catch (error: any) {
+      console.error("Detail Error:", error);
+      alert("Gagal bray: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -448,7 +493,7 @@ export default function AdminPage() {
                         }
 
                         setImageUrl("");
-                        
+
                         setEditId(null);
 
                         router.push("/admin");
