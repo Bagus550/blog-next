@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function ShareButtons({ postTitle, postId }: { postTitle: string, postId: string }) {
   const [copied, setCopied] = useState(false);
-  const shareUrl = `https://bagusblog.vercel.app/blog/${postId}`;
+  const shareUrl = `https://bagus-blog.vercel.app/blog/${postId}`;
 
   const handleCopy = async () => {
     try {
